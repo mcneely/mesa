@@ -1,0 +1,24 @@
+{
+  "name": "mesa",
+  "version": "0.1.0",
+  "description": "AWS Lambda Framework",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mcneely/mesa.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "package": "./bin/package.sh",
+    "build": "npm install && npm run package"
+  },
+  "author": {
+    "name": "Paul L. McNeely",
+    "email": "paul@paulmcneely.com"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "qs": "^6.1.0",
+    "winston": "^2.1.1"
+  }
+}

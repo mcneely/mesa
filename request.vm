@@ -1,0 +1,34 @@
+## convert HTML POST data or HTTP GET query string to JSON
+
+## get the raw post data from the AWS built-in variable and give it a nicer name
+#if ($context.httpMethod == "POST")
+    #set($postData = $input.path('$'))
+#else
+    #set($postData = '')
+#end
+
+#set($rawGetData = $input.params().querystring)
+#set($getData = $rawGetData.toString())
+#set($getDataLength = $getData.length() - 1)
+#set($getData = $getData.substring(1, $getDataLength))
+#set($getData = $getData.replace(", ", "&"))
+
+{
+"rawgetdata":    $input.params().querystring,
+"rawgetdatastring":"$rawGetData.toString()",
+"getdata":       "$getData",
+"postdata":      "$postData",
+"stage":         "$context.stage",
+"request-id":    "$context.requestId",
+"api-id":        "$context.apiId",
+"resource-path": "$context.resourcePath",
+"resource-id":   "$context.resourceId",
+"http-method":   "$context.httpMethod",
+"source-ip":     "$context.identity.sourceIp",
+"user-agent":    "$context.identity.userAgent",
+"account-id":    "$context.identity.accountId",
+"api-key":       "$context.identity.apiKey",
+"caller":        "$context.identity.caller",
+"user":          "$context.identity.user",
+"user-arn":      "$context.identity.userArn"
+}
