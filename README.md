@@ -1,5 +1,5 @@
 # Mesa
-Mesa is a lightweight development template for AWS Lambda Applications.
+Mesa is a lightweight development framework for AWS Lambda Applications.
 
 Requirements
 ------------
