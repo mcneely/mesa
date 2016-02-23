@@ -45,7 +45,7 @@ Authors and contributors
 
 Project status
 --------------
-Mesa is currently maintained by Ryan McCue.
+Mesa is currently maintained by Paul L. McNeely.
 
 License
 -------
