@@ -6,18 +6,19 @@ APP="$BASE/app"
 NODE="$BASE/node_modules"
 DEPLOY="$BASE/deploy"
 ZIPNAME="MesaBuild"
-DEPLOYZIP="$DEPLOY/$ZIPNAME.zip"
-ENVROOT="$ETC"
+DEPLOYZIP="$ZIPNAME.zip"
+ENVROOT="$DEPLOY/etc"
 ENVETCFILE="$ENVROOT/$1.json"
 ENVDIR="$ENVROOT/$1"
 ENVDIRFILE="$ENVDIR/index.json"
 
 cd "$(dirname "$0")"
-mkdir -p "$DEPLOY"
-if [ -f "$DEPLOYZIP" ]
+if [ -d "$DEPLOY" ]
 then
-   rm -f "$DEPLOYZIP"
+   rm -rf "$DEPLOY"
 fi
+mkdir -p "$DEPLOY"
+cp -rf -t "$DEPLOY" "$BASE"/*.js "$NODE" "$APP" "$SRC" "$ETC"
 
 if [ -n "$1" ]
 then
@@ -56,5 +57,6 @@ then
     fi
 fi
 echo "Building package."
-zip -r "$DEPLOYZIP" "$BASE"/*.js "$NODE" "$APP" "$SRC" "$ETC" > /dev/null
+cd $DEPLOY
+zip -mr9 "$DEPLOYZIP" . > /dev/null
 echo "Done."
