@@ -67,7 +67,7 @@ function Kernel(context, event) {
     this.logger.setLevels(winston.config.syslog.levels);
 
     /*
-     We try to grab the environment from event stage then from the function name, if those faile we set to DEFAULT.
+     We try to grab the environment from event stage then from the function name, if those fail we set to DEFAULT.
      */
     var nameArray     = (0 <= context.functionName.indexOf('-')) ? context.functionName.split('-') : [
         context.functionName, 'DEFAULT'
@@ -87,9 +87,13 @@ Kernel.prototype.returnResult = 'SUCCESS';
  */
 Kernel.prototype.loadEnvironment = function loadEnvironment(environment) {
     this.environment = environment.toUpperCase();
-    var path         = String('../etc/' + this.environment)
-        .replace('/DEFAULT', '');
-    this.config      = require(path);
+    var path         = String('../etc/' + this.environment).replace('/DEFAULT', '');
+    try {
+        this.config = require(path);
+    } catch (err) {
+        this.config = {};
+        this.log(String(err).replace('Error: ', '') + " Code: " + err.code, ('DEFAULT' == environment) ? 'warning' : 'error');
+    }
     if ('DEFAULT' == environment && 'undefined' !== typeof this.config.environment && 'DEFAULT' !== this.config.environment) {
         this.loadEnvironment(this.config.environment);
     } else {
