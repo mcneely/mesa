@@ -16,7 +16,7 @@
     "name": "Paul L. McNeely",
     "email": "paul@paulmcneely.com"
   },
-  "license": "Apache-2.0",
+  "license": "MPL-2.0",
   "dependencies": {
     "qs": "^6.1.0",
     "winston": "^2.1.1"

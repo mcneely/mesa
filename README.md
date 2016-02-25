@@ -49,4 +49,4 @@ Mesa is currently maintained by Paul L. McNeely.
 
 License
 -------
-[Apache-2.0](http://www.opensource.org/licenses/Apache-2.0)
+[MPL-2.0](http://www.opensource.org/licenses/MPL-2.0)
