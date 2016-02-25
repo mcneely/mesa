@@ -10,7 +10,7 @@ Quick Start
 This assumes you understand the basics of creating a Lambda function.
 To start a new projects execute the following command.
 ```
-git clone https://github.com/mcneely/mesa.git
+git clone https://github.com/mcneely/mesa.git --depth=1
 ```
 To begin using Mesa, create a new, or move an existing lambda function
 into the `src/` directory. You can either places its as
