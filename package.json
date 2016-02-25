@@ -1,24 +1,28 @@
 {
-  "name": "mesa",
-  "version": "0.1.0",
-  "description": "AWS Lambda Framework",
-  "main": "index.js",
-  "repository": {
+  "name":         "mesa",
+  "version":      "0.1.0",
+  "description":  "AWS Lambda Framework",
+  "main":         "index.js",
+  "repository":   {
     "type": "git",
-    "url": "git://github.com/mcneely/mesa.git"
+    "url":  "git://github.com/mcneely/mesa.git"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+  "scripts":      {
+    "test":    "echo \"Error: no test specified\" && exit 1",
+    "t":       "npm test",
     "package": "./bin/package.sh",
-    "build": "npm install && npm run package"
+    "pack":    "npm run package",
+    "p":       "npm run package",
+    "build":   "npm install && npm run package",
+    "b":       "npm build"
   },
-  "author": {
-    "name": "Paul L. McNeely",
+  "author":       {
+    "name":  "Paul L. McNeely",
     "email": "paul@paulmcneely.com"
   },
-  "license": "MPL-2.0",
+  "license":      "MPL-2.0",
   "dependencies": {
-    "qs": "^6.1.0",
+    "qs":      "^6.1.0",
     "winston": "^2.1.1"
   }
 }
