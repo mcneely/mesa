@@ -16,8 +16,12 @@
  * @class
  */
 function Kernel(context, event) {
-    /** @constant {number} */
-    this.kernelVersion = 1;
+    this.kernelInfo = {"name":"Mesa","version":1};
+    /**
+     * @deprecated
+     * @type {number}
+     */
+    this.kernelVersion = this.kernelInfo.version;
     this.context       = context;
     this.event         = event;
 

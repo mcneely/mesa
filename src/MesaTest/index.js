@@ -5,7 +5,7 @@
  * @param context
  */
 exports.handler = function(event, context) {
-    if(typeof context.kernelVersion !=="undefined") {
+    if(typeof context.kernelInfo.version !=="undefined") {
         context.setLogLevel('debug');
         var service = context.getService("sampleService");
         context.log(service.test("bar"));
