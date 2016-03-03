@@ -76,40 +76,40 @@ function Kernel(context, event) {
     this.logger.setLevels(winston.config.syslog.levels);
 
     /*
-     We try to grab the environment from event stage then from the function name, if those fail we set to DEFAULT.
+     We try to grab the stage from event stage then from the function name, if those fail we set to DEFAULT.
      */
     var nameArray     = (0 <= context.functionName.indexOf('-')) ? context.functionName.split('-') : [
         context.functionName, 'DEFAULT'
     ];
-    var environment   = (typeof event.stage !== 'undefined') ? event.stage : nameArray[1];
+    var stage   = (typeof event.stage !== 'undefined') ? event.stage : nameArray[1];
     this.functionName = nameArray[0];
-    this.loadEnvironment(environment);
+    this.loadStage(stage);
     this.loadServices();
 }
 
 Kernel.prototype.returnResult = 'SUCCESS';
 
 /**
- * @function loadEnvironment
- * Set the environment and load the config based on the environment
- * @param {string} environment
+ * @function loadStage
+ * Set the stage and load the config based on the stage
+ * @param {string} stage
  */
-Kernel.prototype.loadEnvironment = function loadEnvironment(environment) {
-    this.environment = environment.toUpperCase();
-    var path         = String('../etc/' + this.environment).replace('/DEFAULT', '');
+Kernel.prototype.loadStage = function loadStage(stage) {
+    this.stage = stage.toUpperCase();
+    var path         = String('../etc/stages/' + this.stage).replace('/DEFAULT', '');
     try {
         this.config = require(path);
     } catch (err) {
         this.config = {};
-        this.log(String(err).replace('Error: ', '') + " Code: " + err.code, ('DEFAULT' == environment) ? 'warning' : 'error');
+        this.log(String(err).replace('Error: ', '') + " Code: " + err.code, ('DEFAULT' == stage) ? 'warning' : 'error');
     }
-    if ('DEFAULT' == environment && 'undefined' !== typeof this.config.environment && 'DEFAULT' !== this.config.environment) {
-        this.loadEnvironment(this.config.environment);
+    if ('DEFAULT' == stage && 'undefined' !== typeof this.config.stage && 'DEFAULT' !== this.config.stage) {
+        this.loadStage(this.config.stage);
     } else {
         this.config.succeedFails = (typeof this.config.succeedFails !== 'undefined') ? this.config.succeedFails : false;
         var logLevel             = this.config.logLevel || 'error';
         this.setLogLevel(logLevel);
-        this.log('Set environment to: ' + this.environment);
+        this.log('Set stage to: ' + this.stage);
     }
 };
 

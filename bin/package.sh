@@ -1,18 +1,22 @@
 #!/bin/bash
+cd "$(dirname "$0")"
 BASE=".."
 SRC="$BASE/src"
 ETC="$BASE/etc"
 APP="$BASE/app"
 NODE="$BASE/node_modules"
-DEPLOY="$BASE/deploy"
-ZIPNAME="MesaBuild"
+DEPLOY="$BASE/deploy/$1"
+STGROOT="$DEPLOY/etc/stages"
+STGETCFILE="$STGROOT/$1.json"
+STGDIR="$STGROOT/$1"
+STGDIRINDEXFILE="$STGDIR/index.json"
+STGDIRPACKAGEFILE="$STGDIR/package.json"
+SCRIPTPATH=`pwd -P`
+PROJECTNAME="$(basename $(dirname "$SCRIPTPATH"))"
+ZIPNAME="$PROJECTNAME-$1"
 DEPLOYZIP="$ZIPNAME.zip"
-ENVROOT="$DEPLOY/etc"
-ENVETCFILE="$ENVROOT/$1.json"
-ENVDIR="$ENVROOT/$1"
-ENVDIRFILE="$ENVDIR/index.json"
+echo "$ZIPNAME"
 
-cd "$(dirname "$0")"
 if [ -d "$DEPLOY" ]
 then
    rm -rf "$DEPLOY"
@@ -25,23 +29,23 @@ then
     if [ "$2" == "LINK" ]
     then
         echo "Creating Link File."
-        echo "{\"environment\":\"$1\"}" > "$ETC/index.json"
+        echo "{\"environment\":\"$1\"}" > "$STGROOT/index.json"
     else
-        if [ -f "$ENVETCFILE" ]
+        if [ -f "$STGETCFILE" ]
         then
-           TO="$ENVROOT/index.json"
-           FROM="$ENVETCFILE"
+           TO="$STGROOT/index.json"
+           FROM="$STGETCFILE"
         else
-            if [ -f "$ENVDIRFILE" ]
+            if [ -f "$STGDIRINDEXFILE" ] || [ -f "$STGDIRPACKAGEFILE" ]
             then
-               TO="$ENVROOT"
-               FROM="$ENVDIR/*"
+               TO="$STGROOT"
+               FROM="$STGDIR/*"
             fi
         fi
 
         if [ -n "$TO" ]
         then
-            echo "Copying $1 Environment File(s)."
+            echo "Copying $1 Stage File(s)."
             COMMAND="cp -rf $FROM $TO"
             eval "$COMMAND"
 
