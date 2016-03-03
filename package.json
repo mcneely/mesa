@@ -24,5 +24,8 @@
   "dependencies": {
     "qs":      "^6.1.0",
     "winston": "^2.1.1"
+  },
+  "engines": {
+    "node": "0.10.36"
   }
 }
