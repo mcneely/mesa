@@ -49,9 +49,7 @@ function Kernel(context, event) {
                 (this.post) ? JSON.stringify(this.post)
                                   .trim() : ''
             ];
-            var result = data.filter(Boolean)
-                             .join('|')
-                             .replace("}|{", ",");
+            var result = data.filter(Boolean).join('|').replace("}|{", ",");
             return (result) ? JSON.parse(result) : false;
         }
     };
@@ -81,7 +79,7 @@ function Kernel(context, event) {
     var nameArray     = (0 <= context.functionName.indexOf('-')) ? context.functionName.split('-') : [
         context.functionName, 'DEFAULT'
     ];
-    var stage   = (typeof event.stage !== 'undefined') ? event.stage : nameArray[1];
+    var stage   = (typeof event.stage !== 'undefined') ?  event.stage.split('-')[0]: nameArray[1];
     this.functionName = nameArray[0];
     this.loadStage(stage);
     this.loadServices();
