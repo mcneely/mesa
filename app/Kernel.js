@@ -37,10 +37,11 @@ function Kernel(context, event) {
         }
     }
 
-    var qs       = require('qs');
+    this.queryString = require('qs');
     this.request = {
         "get" : "",
         "post": "",
+
         "all" : function() {
             var data   = [(this.get) ? JSON.stringify(this.get).trim() : '', (this.post) ? JSON.stringify(this.post).trim() : ''];
             var result = data.filter(Boolean).join('|').replace("}|{", ",");
@@ -48,8 +49,8 @@ function Kernel(context, event) {
         }
     };
 
-    this.request.get  = (typeof event.getdata !== 'undefined' && event.getdata.trim() !== '') ? qs.parse(event.getdata) : false;
-    this.request.post = (typeof event.postdata !== 'undefined' && event.postdata.trim() !== '') ? qs.parse(event.postdata) : false;
+    this.request.get  = (typeof event.getdata !== 'undefined' && event.getdata.trim() !== '') ? this.queryString.parse(event.getdata) : false;
+    this.request.post = (typeof event.postdata !== 'undefined' && event.postdata.trim() !== '') ? this.queryString.parse(event.postdata) : false;
 
     var winston = require('winston');
     this.logger = new (winston.Logger)({
