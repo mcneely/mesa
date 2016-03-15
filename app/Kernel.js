@@ -16,19 +16,18 @@
  * @class
  */
 function Kernel(context, event) {
-    this.kernelInfo = {"name":"Mesa","version":1};
-    /**
-     * @deprecated
-     * @type {number}
-     */
-    this.kernelVersion = this.kernelInfo.version;
-    this.context       = context;
-    this.event         = event;
+    this.kernelInfo = {
+        "name"   : "Mesa",
+        "version": 1
+    };
 
-    this.mapValues     = {
-        "%kernel%": this,
-        "%context%": context,
-        "%event%": event
+    this.context = context;
+    this.event   = event;
+
+    this.mapValues = {
+        "kernel" : this,
+        "context": context,
+        "event"  : event
     };
 
     //Since the Kernel Masquerades as context, we need to copy just it's variables to it, functions have been mapped to the context object.
@@ -38,27 +37,22 @@ function Kernel(context, event) {
         }
     }
 
-    var qs            = require('qs');
-    this.request      = {
+    var qs       = require('qs');
+    this.request = {
         "get" : "",
         "post": "",
         "all" : function() {
-            var data   = [
-                (this.get) ? JSON.stringify(this.get)
-                                 .trim() : '',
-                (this.post) ? JSON.stringify(this.post)
-                                  .trim() : ''
-            ];
+            var data   = [(this.get) ? JSON.stringify(this.get).trim() : '', (this.post) ? JSON.stringify(this.post).trim() : ''];
             var result = data.filter(Boolean).join('|').replace("}|{", ",");
             return (result) ? JSON.parse(result) : false;
         }
     };
 
-    this.request.get  = (typeof event.getdata  !== 'undefined' && event.getdata.trim()  !== '') ? qs.parse(event.getdata)  : false;
+    this.request.get  = (typeof event.getdata !== 'undefined' && event.getdata.trim() !== '') ? qs.parse(event.getdata) : false;
     this.request.post = (typeof event.postdata !== 'undefined' && event.postdata.trim() !== '') ? qs.parse(event.postdata) : false;
 
-    var winston       = require('winston');
-    this.logger       = new (winston.Logger)({
+    var winston = require('winston');
+    this.logger = new (winston.Logger)({
         transports: [
             new (winston.transports.Console)({
                 timestamp: function() {
@@ -79,7 +73,7 @@ function Kernel(context, event) {
     var nameArray     = (0 <= context.functionName.indexOf('-')) ? context.functionName.split('-') : [
         context.functionName, 'DEFAULT'
     ];
-    var stage   = (typeof event.stage !== 'undefined') ?  event.stage.split('-')[0]: nameArray[1];
+    var stage         = (typeof event.stage !== 'undefined') ? event.stage.split('-')[0] : nameArray[1];
     this.functionName = nameArray[0];
     this.loadStage(stage);
     this.loadServices();
@@ -94,12 +88,14 @@ Kernel.prototype.returnResult = 'SUCCESS';
  */
 Kernel.prototype.loadStage = function loadStage(stage) {
     this.stage = stage.toUpperCase();
-    var path         = String('../etc/stages/' + this.stage).replace('/DEFAULT', '');
+    var path   = String('../etc/stages/' + this.stage)
+        .replace('/DEFAULT', '');
     try {
         this.config = require(path);
     } catch (err) {
         this.config = {};
-        this.log(String(err).replace('Error: ', '') + " Code: " + err.code, ('DEFAULT' == stage) ? 'warning' : 'error');
+        this.log(String(err)
+                     .replace('Error: ', '') + " Code: " + err.code, ('DEFAULT' == stage) ? 'warning' : 'error');
     }
     if ('DEFAULT' == stage && 'undefined' !== typeof this.config.stage && 'DEFAULT' !== this.config.stage) {
         this.loadStage(this.config.stage);
@@ -115,32 +111,52 @@ Kernel.prototype.loadServices = function loadServices() {
     this.services = require('../etc/services');
 };
 
+Kernel.prototype.traverse = function traverse(object, keyString) {
+    var keyArray = keyString.split('.');
+    return keyArray.reduce(function(object, key) {
+        return object[key] || false;
+    }, object)
+};
+
+Kernel.prototype.getVariable = function getVariable(value) {
+    var valArray = value.split('%');
+    for (var i = 1; i <= Math.floor(valArray.length / 2) * 2; i += 2) {
+        var returnValue = false;
+        var key         = valArray[i];
+        returnValue     = (this.traverse(this.config, key)) ? this.traverse(this.config, key) : returnValue;
+        returnValue     = (this.traverse(this.mapValues, key)) ? this.traverse(this.mapValues, key) : returnValue;
+        value           = (returnValue) ? returnValue : value;
+    }
+
+    return value;
+};
+
 Kernel.prototype.getService = function getService(serviceName) {
-    var path = ('undefined' !== typeof this.services[serviceName]) ? '..' + this.services[serviceName].path : serviceName;
-    var service = require(path);
+    var path      = ('undefined' !== typeof this.services[serviceName]) ? '..' + this.services[serviceName].path : serviceName;
+    var service   = require(path);
     var arguments = this.services[serviceName].arguments || [];
     var commands  = this.services[serviceName].commands || [];
-    var instance = Object.create(service.prototype);
+    var instance  = Object.create(service.prototype);
 
-    var argumentFilter = function(array, that) {
+    var argumentFilter = function(array) {
         return array.map(function(value) {
-            return (typeof this.mapValues[value] !== "undefined") ? this.mapValues[value] : value;
-        }, that);
-    };
+            return this.getVariable(value);
+        }, this);
+    }.bind(this);
 
     if (arguments.length > 0) {
-        service.apply(instance, argumentFilter(arguments, this))
+        service.apply(instance, argumentFilter(arguments))
     } else {
         instance = new service;
     }
 
-    if(commands.length > 0) {
-        commands.map(function(value){
-            switch(typeof value) {
+    if (commands.length > 0) {
+        commands.map(function(value) {
+            switch (typeof value) {
                 case "object":
                     var func = instance[value["name"]];
                     if (value["arguments"].length > 0) {
-                        func.apply(instance, argumentFilter(value["arguments"], this));
+                        func.apply(instance, argumentFilter(value["arguments"]));
                     } else {
                         instance[value["name"]]();
                     }
@@ -250,5 +266,4 @@ Kernel.prototype.getRemainingTimeInSecs = function getRemainingTimeInSecs() {
     return Math.floor(this.context.getRemainingTimeInMillis() / 1000);
 };
 
-Kernel.prototype.constructor = Kernel;
-module.exports = Kernel;
+module.exports               = Kernel;

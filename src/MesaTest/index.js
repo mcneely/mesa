@@ -5,6 +5,7 @@
  * @param context
  */
 exports.handler = function(event, context) {
+    console.log(context.getRemainingTimeInMillis());
     if(typeof context.kernelInfo.version !=="undefined") {
         context.setLogLevel('debug');
         var service = context.getService("sampleService");
