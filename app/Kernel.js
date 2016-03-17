@@ -30,6 +30,36 @@ function Kernel(context, event) {
         "event"  : event
     };
 
+    this.loadServices();
+    this.addService("queryString", "qs");
+    var queryString = this.getService("queryString");
+    var winston = require('winston');
+
+    var loggerArguments = [
+        {
+            transports: [
+                new (winston.transports.Console)({
+                    timestamp: function() {
+                        return Date.now();
+                    },
+                    formatter: function(options) {
+                        return '[' + options.level.toUpperCase() + '] ' + (undefined !== options.message ? options.message : '') + (options.meta && Object.keys(options.meta).length ? '\n\t' + JSON.stringify(options.meta) : '' );
+                    }
+                })
+            ]
+        }
+    ];
+
+    var loggerCommands = [
+        {
+            "name"     : "setLevels",
+            "arguments": [winston.config.syslog.levels]
+        }
+    ];
+
+    this.addService("logger", "winston.Logger", loggerArguments, loggerCommands);
+    this.logger = this.getService("logger");
+
     //Since the Kernel Masquerades as context, we need to copy just it's variables to it, functions have been mapped to the context object.
     for (var attr in JSON.parse(JSON.stringify(context))) {
         if (context.hasOwnProperty(attr)) {
@@ -37,7 +67,6 @@ function Kernel(context, event) {
         }
     }
 
-    this.queryString = require('qs');
     this.request = {
         "get" : "",
         "post": "",
@@ -49,24 +78,8 @@ function Kernel(context, event) {
         }
     };
 
-    this.request.get  = (typeof event.getdata !== 'undefined' && event.getdata.trim() !== '') ? this.queryString.parse(event.getdata) : false;
-    this.request.post = (typeof event.postdata !== 'undefined' && event.postdata.trim() !== '') ? this.queryString.parse(event.postdata) : false;
-
-    var winston = require('winston');
-    this.logger = new (winston.Logger)({
-        transports: [
-            new (winston.transports.Console)({
-                timestamp: function() {
-                    return Date.now();
-                },
-                formatter: function(options) {
-                    return '[' + options.level.toUpperCase() + '] ' + (undefined !== options.message ? options.message : '') + (options.meta && Object.keys(options.meta).length ? '\n\t' + JSON.stringify(options.meta) : '' );
-                }
-            })
-        ]
-    });
-
-    this.logger.setLevels(winston.config.syslog.levels);
+    this.request.get  = (typeof event.getdata !== 'undefined' && event.getdata.trim() !== '') ? queryString.parse(event.getdata) : false;
+    this.request.post = (typeof event.postdata !== 'undefined' && event.postdata.trim() !== '') ? queryString.parse(event.postdata) : false;
 
     /*
      We try to grab the stage from event stage then from the function name, if those fail we set to DEFAULT.
@@ -77,7 +90,7 @@ function Kernel(context, event) {
     var stage         = (typeof event.stage !== 'undefined') ? event.stage.split('-')[0] : nameArray[1];
     this.functionName = nameArray[0];
     this.loadStage(stage);
-    this.loadServices();
+
 }
 
 Kernel.prototype.returnResult = 'SUCCESS';
@@ -112,32 +125,57 @@ Kernel.prototype.loadServices = function loadServices() {
     this.services = require('../etc/services');
 };
 
-Kernel.prototype.traverse = function traverse(object, keyString) {
-    var keyArray = keyString.split('.');
+Kernel.prototype.traverse = function traverse(object, key) {
+    var keyArray = (Array.isArray(key)) ? key : key.split('.');
     return keyArray.reduce(function(object, key) {
         return object[key] || false;
     }, object)
 };
 
 Kernel.prototype.getVariable = function getVariable(value) {
-    var valArray = value.split('%');
-    for (var i = 1; i <= Math.floor(valArray.length / 2) * 2; i += 2) {
-        var returnValue = false;
-        var key         = valArray[i];
-        returnValue     = (this.traverse(this.config, key)) ? this.traverse(this.config, key) : returnValue;
-        returnValue     = (this.traverse(this.mapValues, key)) ? this.traverse(this.mapValues, key) : returnValue;
-        value           = (returnValue) ? returnValue : value;
+    if("string" == typeof value) {
+        var valArray = value.split('%');
+        for (var i = 1; i <= Math.floor(valArray.length / 2) * 2; i += 2) {
+            var returnValue = false;
+            var key         = valArray[i];
+            returnValue     = (this.traverse(this.config, key)) ? this.traverse(this.config, key) : returnValue;
+            returnValue     = (this.traverse(this.mapValues, key)) ? this.traverse(this.mapValues, key) : returnValue;
+            returnValue     = (this.services[key]) ? this.getService(key) : returnValue;
+            value           = (returnValue) ? returnValue : value;
+        }
     }
 
     return value;
 };
+/**
+ *
+ * @param {string} serviceName
+ * @param {string} servicePath
+ * @param {Array} [serviceArguments]
+ * @param {Array} [serviceCommands]
+ */
+Kernel.prototype.addService = function addService(serviceName, servicePath, serviceArguments, serviceCommands) {
+    serviceName      = serviceName || false;
+    servicePath      = servicePath || false;
+    serviceArguments = serviceArguments || [];
+    serviceCommands  = serviceCommands || [];
+    // && "undefined" == typeof this.services[serviceName]
+    if (serviceName && servicePath) {
+        this.services[serviceName] = {
+            "path"     : servicePath,
+            "arguments": serviceArguments,
+            "commands" : serviceCommands
+        };
+    }
+};
 
 Kernel.prototype.getService = function getService(serviceName) {
-    var path      = ('undefined' !== typeof this.services[serviceName]) ? '..' + this.services[serviceName].path : serviceName;
-    var service   = require(path);
+    var path      = ('undefined' !== typeof this.services[serviceName]) ? (((0 == this.services[serviceName].path.indexOf("/")) ? '..' : '' ) + this.services[serviceName].path ): serviceName;
+    var nested    = (path.indexOf(".") > 0) ? path.split(".") : [];
+    var service   = (nested.length > 0) ? this.traverse(require(nested.shift()), nested) : require(path);
     var arguments = this.services[serviceName].arguments || [];
     var commands  = this.services[serviceName].commands || [];
-    var instance  = Object.create(service.prototype);
+    var instance  =  ('function' !== typeof service) ?  service : Object.create(service.prototype);
 
     var argumentFilter = function(array) {
         return array.map(function(value) {
@@ -147,8 +185,6 @@ Kernel.prototype.getService = function getService(serviceName) {
 
     if (arguments.length > 0) {
         service.apply(instance, argumentFilter(arguments))
-    } else {
-        instance = new service;
     }
 
     if (commands.length > 0) {
