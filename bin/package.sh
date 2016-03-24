@@ -1,7 +1,7 @@
 #!/bin/bash
 cd "$(dirname "$0")"
 BASE=".."
-SRC="$BASE/src"
+LIB="$BASE/LIB"
 ETC="$BASE/etc"
 APP="$BASE/app"
 NODE="$BASE/node_modules"
@@ -22,7 +22,7 @@ then
    rm -rf "$DEPLOY"
 fi
 mkdir -p "$DEPLOY"
-cp -rf -t "$DEPLOY" "$BASE"/*.js "$NODE" "$APP" "$SRC" "$ETC"
+cp -rf -t "$DEPLOY" "$BASE"/*.js "$NODE" "$APP" "$LIB" "$ETC"
 
 if [ -n "$1" ]
 then

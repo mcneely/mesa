@@ -1,6 +1,6 @@
 {
   "sampleService": {
-    "path":      "/src/SampleService",
+    "path":      "/lib/SampleService",
     "arguments": ["%kernel%"],
     "commands":  [{"name":"test", "arguments":["foo"]}]
   }

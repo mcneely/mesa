@@ -13,6 +13,6 @@ var Kernel = require('app/Kernel.js');
 exports.handler = function(event, context)
 {
     var kernel = new Kernel(context, event);
-    var functionHandler = require('./src/' + kernel.functionName);
+    var functionHandler = require('./lib/' + kernel.functionName);
     functionHandler.handler(event, kernel);
 };
