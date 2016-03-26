@@ -8,7 +8,7 @@
     "url": "git://github.com/mcneely/mesa.git"
   },
   "scripts": {
-    "test": "mocha",
+    "test": "./node_modules/mocha/bin/mocha",
     "t": "npm test",
     "package": "./bin/package.sh",
     "pack": "npm run package",
@@ -29,6 +29,7 @@
     "node": "0.10.36"
   },
   "devDependencies": {
+    "mocha": "^2.4.5",
     "unit.js": "^2.0.0"
   }
 }
