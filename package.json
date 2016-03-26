@@ -8,7 +8,7 @@
     "url": "git://github.com/mcneely/mesa.git"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha",
     "t": "npm test",
     "package": "./bin/package.sh",
     "pack": "npm run package",
