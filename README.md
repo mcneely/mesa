@@ -1,6 +1,7 @@
 # Mesa
 
 [![Join the chat at https://gitter.im/mcneely/mesa](https://badges.gitter.im/mcneely/mesa.svg)](https://gitter.im/mcneely/mesa?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Mesa is a lightweight development framework for AWS Lambda Applications.
 
 Requirements
