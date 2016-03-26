@@ -2,6 +2,7 @@
 
 [![Join the chat at https://gitter.im/mcneely/mesa](https://badges.gitter.im/mcneely/mesa.svg)](https://gitter.im/mcneely/mesa?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/mcneely/mesa.svg?branch=master)](https://travis-ci.org/mcneely/mesa)
+[![devDependency Status](https://david-dm.org/mcneely/mesa/dev-status.svg)](https://david-dm.org/mcneely/mesa#info=devDependencies)
 
 Mesa is a lightweight development framework for AWS Lambda Applications.
 
