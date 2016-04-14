@@ -31,6 +31,13 @@ Make sure that `<Function Name>` is the exact name you will give the lambda
 function in AWS. When uploading the lambda in AWS, make sure that that handler
 is set to the default: index.handler
 
+Building the package
+--------------------
+```
+npm run build [<stage>]
+```
+
+
 How it works
 ------------
 When you upload and execute the lambda function, the context and event objects
