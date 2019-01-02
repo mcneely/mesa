@@ -46,8 +46,7 @@ dependency injection, non-JSON POST/GET request handling.
 Authors and contributors
 ------------------------
 ### Current
-* [Paul L. McNeely][] (Maintainer, support)
-[Paul L. McNeely]: http://paulmcneely.com
+* [Paul L. McNeely](http://paulmcneely.com) (Maintainer, support)
 
 Project status
 --------------
